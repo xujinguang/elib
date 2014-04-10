@@ -1,6 +1,9 @@
 #ifndef _LIST_H
 #define _LIST_H
 
+#define LIST_POISON1 NULL
+#define LIST_POISON2 NULL
+
 struct list_head {
 	struct list_head *next, *prev;
 };
