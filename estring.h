@@ -4,6 +4,42 @@
 #include <string.h>
 #include <math.h>
 
+#define CHECK_IN(patter, str) \
+	if(pattern == NULL || str == NULL)\
+		return NULL
+
+/*Brute-force algorithm: The obvious method for pattern matching*/
+const char* strsearch_bf(const char* pattern, const char* str)
+{
+	int i, j;
+	int m, n;
+
+	CHECK_IN(pattern, str);
+	m = strlen(pattern);
+	n = strlen(str);
+	if(m > n)
+		return NULL;
+
+	i = j = 0;
+	while(j < m && i < n)
+	{
+		if(str[i] == pattern[j])
+		{
+			++i;
+			++j;
+		}
+		else
+		{
+			i -= j + 1;
+			j = 0;
+		}
+	}
+
+	if(j == m)
+		return str + i - m;
+	return NULL;
+}
+
 long  estrtol(const char* str, int len, int base)
 {
 	int i;
@@ -41,8 +77,7 @@ const char* bstrsearch_rk(const char* pattern, const char* str)
 	int n, m;
 	int i;
 
-	if (pattern == NULL || str == NULL)
-		return NULL;
+	CHECK_IN(pattern, str);
 
 	m = strlen(pattern);
 	n = strlen(str);
@@ -102,8 +137,7 @@ static const char* __rksearch(const char* pattern, const char* str,
 
 static const char* strsearch_rk(const char *pattern, const char *str)
 {
-	if (pattern == NULL || str == NULL)
-		return NULL;
+	CHECK_IN(pattern, str);
 
 	if(strlen(pattern) > strlen(str))
 		return NULL;
@@ -138,9 +172,7 @@ static const char* strsearch_kmp(const char *pattern, const char *str)
 	int m, n;
 	int *next;
 
-	if (pattern == NULL || str == NULL)
-		return NULL;
-
+	CHECK_IN(pattern, str);
 	m = strlen(pattern);
 	n = strlen(str);
 	if(m > n)
@@ -170,14 +202,15 @@ static const char* strsearch_kmp(const char *pattern, const char *str)
 }
 
 enum{
-	STRING_SEARCH_RK,
 	STRING_SEARCH_KMP,	
-	STRING_SEARCH_BM,		
+	STRING_SEARCH_RK,
+	STRING_SEARCH_BF,		
 };
 
-const char* (*search_fun[])(const char* pattern, const char* str) = {
+static const char* (*search_fun[])(const char* pattern, const char* str) = {
+	strsearch_kmp,
 	strsearch_rk,
-	strsearch_kmp,};
+	strsearch_bf};
 
 #define strsearch(PATTERN, STR, ID)	(search_fun[ID](PATTERN, STR))
 #endif
