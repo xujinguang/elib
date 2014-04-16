@@ -146,6 +146,41 @@ static const char* strsearch_rk(const char *pattern, const char *str)
 	return __rksearch(pattern, str, 2, 524287);
 }
 
+/*shift or algorithm*/
+
+#define ALPHER_SPACE_SIZE   256
+#define DWORD   (sizeof(unsigned int) * 8)
+static const char * strsearch_so(const char* pattern, const char* str)
+{
+    unsigned int limit, j;
+    unsigned int s[ALPHER_SPACE_SIZE];
+    int i;
+    int m, n;
+
+    CHECK_IN(pattern, str);
+    m = strlen(pattern);
+    n = strlen(str);
+    if(m > DWORD || m > n)
+        return NULL;
+
+    /*init s array*/
+    for(i = 0; i < ALPHER_SPACE_SIZE; ++i)
+        s[i] = 0xFFFFFFFF;
+    for(i = 0, j = 1; i < m; ++i, j <<= 1)
+        s[pattern[i]] &= ~j;
+
+    limit = ~((1 << m) - 1);
+    
+    for(j = ~0, i = 0; i < n; ++i)
+    {
+        j = (j << 1) | s[str[i + 1]];
+        if(j < limit)
+            return str + i - m + 1;
+    }
+
+    return NULL;
+}
+
 static inline void init_next(const char *pattern, int *next)
 {
 	int i, j;
