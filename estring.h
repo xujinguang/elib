@@ -152,7 +152,7 @@ static const char* strsearch_rk(const char *pattern, const char *str)
 #define DWORD   (sizeof(unsigned int) * 8)
 static const char * strsearch_so(const char* pattern, const char* str)
 {
-    unsigned int limit, j;
+    unsigned int limit, stv;//state vetor
     unsigned int s[ALPHER_SPACE_SIZE];
     int i;
     int m, n;
@@ -163,19 +163,21 @@ static const char * strsearch_so(const char* pattern, const char* str)
     if(m > DWORD || m > n)
         return NULL;
 
-    /*init s array*/
+    /*初始化掩码每个bit为1*/
     for(i = 0; i < ALPHER_SPACE_SIZE; ++i)
         s[i] = 0xFFFFFFFF;
+
+	/*置位字符pattern[i]的掩码S的第i位*/
     for(i = 0, j = 1; i < m; ++i, j <<= 1)
         s[pattern[i]] &= ~j;
 
+	/*匹配条件*/
     limit = ~((1 << m) - 1);
     
-    for(j = ~0, i = 0; i < n; ++i)
-    {
-        j = (j << 1) | s[str[i + 1]];
-        if(j < limit)
-            return str + i - m + 1;
+    for(stv = ~0, i = 0; i < n; ++i) {
+        stv = (stv << 1) | s[str[i + 1]]; 
+        if(stv < limit) //也可以通过检测第m位是否为0
+            return str + i - m + 1; //返回在str匹配的起始位置
     }
 
     return NULL;
